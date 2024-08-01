@@ -1,0 +1,603 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "additionalProperties": false,
+    "definitions": {
+        "AnyEvent": {
+            "anyOf": [
+                {
+                    "$ref": "#/definitions/GenericEvent"
+                },
+                {
+                    "$ref": "#/definitions/TutorialEvent"
+                }
+            ]
+        },
+        "BasicDate": {
+            "additionalProperties": false,
+            "properties": {
+                "day": {
+                    "description": "Day of the month",
+                    "maximum": 31,
+                    "minimum": 1,
+                    "type": "number"
+                },
+                "month": {
+                    "description": "Month of the year",
+                    "maximum": 12,
+                    "minimum": 1,
+                    "type": "number"
+                },
+                "year": {
+                    "description": "Year",
+                    "minimum": 0,
+                    "type": "number"
+                }
+            },
+            "required": [
+                "day",
+                "month",
+                "year"
+            ],
+            "type": "object"
+        },
+        "DisplaySections": {
+            "additionalProperties": false,
+            "description": "Allows turning specific sections of the website off. This is useful if\nthe content for these parts is not fully ready.",
+            "properties": {
+                "schedule": {
+                    "default": true,
+                    "description": "Display the schedule",
+                    "type": "boolean"
+                },
+                "tutorial": {
+                    "default": true,
+                    "description": "Display the list of tutorials",
+                    "type": "boolean"
+                },
+                "twitterFeed": {
+                    "default": true,
+                    "description": "Display the twitter feed",
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
+        },
+        "EmbeddedForm": {
+            "properties": {
+                "embedTag": {
+                    "description": "The embedding tag copied from the site",
+                    "type": "string"
+                },
+                "hidden": {
+                    "default": false,
+                    "description": "Whether the form should be viewable (vs returning form not found)",
+                    "type": "boolean"
+                },
+                "prefillMappings": {
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "type": "object"
+                },
+                "shortTitle": {
+                    "description": "Short version of the title to be used in links",
+                    "type": "string"
+                },
+                "title": {
+                    "description": "The friendly title that will appear at the top of the form",
+                    "type": "string"
+                },
+                "type": {
+                    "const": "cognito",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "embedTag",
+                "shortTitle",
+                "title",
+                "type"
+            ],
+            "type": "object"
+        },
+        "Event": {
+            "description": "Basic info about the event",
+            "properties": {
+                "endDate": {
+                    "$ref": "#/definitions/BasicDate"
+                },
+                "startDate": {
+                    "$ref": "#/definitions/BasicDate"
+                },
+                "year": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "endDate",
+                "startDate",
+                "year"
+            ],
+            "type": "object"
+        },
+        "FAQ": {
+            "properties": {
+                "answer": {
+                    "type": "string"
+                },
+                "question": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "answer",
+                "question"
+            ],
+            "type": "object"
+        },
+        "GenericEvent": {
+            "additionalProperties": false,
+            "properties": {
+                "color": {
+                    "description": "Change the color from the default purple. Accepts any valid css color\nstring",
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "Length of the event as hh:mm",
+                    "pattern": "^\\d\\d?\\:\\d\\d$",
+                    "type": "string"
+                },
+                "link": {
+                    "description": "Optional link. Use '#link' to link to an id on the page, otherwise use an\nabsolute url",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "position": {
+                    "description": "For internal use only. Do not manually set. This will be used in config\ngenerated by the calendar creator",
+                    "type": "number"
+                },
+                "priority": {
+                    "description": "Used to control where the event appears when mutliple events are stacked\nside by side. Higher priority events appear closer to the left.",
+                    "type": "number"
+                },
+                "room": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Optional string or list of strings listing the rooms."
+                },
+                "time": {
+                    "description": "Time of the event (in 24hr time)",
+                    "pattern": "^\\d\\d?\\:\\d\\d$",
+                    "type": "string"
+                },
+                "widthFactor": {
+                    "description": "For internal use only. Do not manually set. This will be used in config\ngenerated by the calendar creator",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "duration",
+                "name",
+                "time"
+            ],
+            "type": "object"
+        },
+        "LocationConfig": {
+            "additionalProperties": false,
+            "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "maps_id": {
+                    "description": "Map ID from Google Maps Embed API, as in:\n...?q=place_id:<MAP ID>&key=...",
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "province": {
+                    "description": "Two letter province code",
+                    "pattern": "^[A-Z][A-Z]$",
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "url": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "city",
+                "maps_id",
+                "name",
+                "province",
+                "street",
+                "url"
+            ],
+            "type": "object"
+        },
+        "Person": {
+            "properties": {
+                "github": {
+                    "description": "Github username\n\nDo not include the initial `@`",
+                    "pattern": "^[a-zA-Z0-9](?:-(?=[a-zA-Z0-9])|[a-zA-Z0-9]){0,38}(?<=[a-zA-Z0-9])$",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "name"
+            ],
+            "type": "object"
+        },
+        "Project": {
+            "additionalProperties": false,
+            "properties": {
+                "description": {
+                    "description": "Project description (in markdown)",
+                    "type": "string"
+                },
+                "organizers": {
+                    "description": "One or more sponsors for the project",
+                    "items": {
+                        "$ref": "#/definitions/Person"
+                    },
+                    "type": "array"
+                },
+                "title": {
+                    "description": "Project title (in plain text)",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "Project URL (e.g. github or similar)",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "description",
+                "organizers",
+                "title"
+            ],
+            "type": "object"
+        },
+        "Registration": {
+            "additionalProperties": false,
+            "description": "Settings pertaining to registration forms and status",
+            "properties": {
+                "closeDate": {
+                    "$ref": "#/definitions/BasicDate",
+                    "additionalProperties": false,
+                    "description": "The date registration should close"
+                },
+                "cost": {
+                    "type": "number"
+                },
+                "emailSignupTarget": {
+                    "description": "Url of a webhook (e.g. from make.com) to send data from the email signup\nform This form is used in place of the registration button when\nregistration status is set to \"unopened\". The webhook should be configured\nto take POSTed JSON data with a single field: \"email\"",
+                    "type": "string"
+                },
+                "openDate": {
+                    "$ref": "#/definitions/BasicDate",
+                    "additionalProperties": false,
+                    "description": "The date registration should open."
+                },
+                "projectPitchUrl": {
+                    "description": "Link to a form where users can pitch a brainhack project",
+                    "type": "string"
+                },
+                "status": {
+                    "description": "Current registration status. If blank, it will be automatically inferred\nat build time from the open and close dates. Otherwise it overrides any\ninference.",
+                    "enum": [
+                        "closed",
+                        "open",
+                        "unopened"
+                    ],
+                    "type": "string"
+                },
+                "url": {
+                    "description": "Url of the registration form",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "cost",
+                "projectPitchUrl"
+            ],
+            "type": "object"
+        },
+        "ScheduleConfig<AnyEvent>": {
+            "additionalProperties": false,
+            "properties": {
+                "days": {
+                    "description": "List of days to include in the schedule. Each day contains its own scheduled\nevents.",
+                    "items": {
+                        "$ref": "#/definitions/ScheduleDay<AnyEvent>"
+                    },
+                    "type": "array"
+                },
+                "endTime": {
+                    "description": "Last hour to display on the schedule (in 24hr time).\nEvents falling after this will be clipped.",
+                    "maximum": 23,
+                    "minimum": 0,
+                    "type": "number"
+                },
+                "name": {
+                    "description": "Name of the schedule.",
+                    "type": "string"
+                },
+                "startTime": {
+                    "description": "First hour to display on the schedule (in 24hr time).",
+                    "maximum": 23,
+                    "minimum": 0,
+                    "type": "number"
+                }
+            },
+            "required": [
+                "days",
+                "endTime",
+                "name",
+                "startTime"
+            ],
+            "type": "object"
+        },
+        "ScheduleDay<AnyEvent>": {
+            "additionalProperties": false,
+            "properties": {
+                "day": {
+                    "description": "Day of the month",
+                    "maximum": 31,
+                    "minimum": 1,
+                    "type": "number"
+                },
+                "events": {
+                    "description": "List of events to be held on this day.",
+                    "items": {
+                        "$ref": "#/definitions/AnyEvent"
+                    },
+                    "type": "array"
+                },
+                "month": {
+                    "description": "Month of the year",
+                    "maximum": 12,
+                    "minimum": 1,
+                    "type": "number"
+                },
+                "year": {
+                    "description": "Year",
+                    "minimum": 0,
+                    "type": "number"
+                }
+            },
+            "required": [
+                "day",
+                "events",
+                "month",
+                "year"
+            ],
+            "type": "object"
+        },
+        "SponsorConfig": {
+            "additionalProperties": false,
+            "properties": {
+                "img": {
+                    "description": "Url to the image for the sponsor. Image should be saved under /public.\nThe url does not include public. For instance, if the image is saved at\n[Project]/public/img/tutorial-pic.png, enter \"/img/tutorial-pic.png\".\n\nImage should be saved with square dimensions larger than 250x250px",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Name of the sponsor to be printed",
+                    "type": "string"
+                },
+                "url": {
+                    "description": "Url for the sponsors website",
+                    "pattern": "^http[s]?:\\/\\/(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+$",
+                    "type": "string"
+                }
+            },
+            "required": [
+                "img",
+                "name",
+                "url"
+            ],
+            "type": "object"
+        },
+        "TutorialEvent": {
+            "additionalProperties": false,
+            "description": "Event that links to a tutorial definition",
+            "properties": {
+                "color": {
+                    "description": "Change the color from the default purple. Accepts any valid css color\nstring",
+                    "type": "string"
+                },
+                "duration": {
+                    "description": "Length of the event as hh:mm",
+                    "pattern": "^\\d\\d?\\:\\d\\d$",
+                    "type": "string"
+                },
+                "position": {
+                    "description": "For internal use only. Do not manually set. This will be used in config\ngenerated by the calendar creator",
+                    "type": "number"
+                },
+                "priority": {
+                    "description": "Used to control where the event appears when mutliple events are stacked\nside by side. Higher priority events appear closer to the left.",
+                    "type": "number"
+                },
+                "room": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Optional string or list of strings listing the rooms."
+                },
+                "time": {
+                    "description": "Time of the event (in 24hr time)",
+                    "pattern": "^\\d\\d?\\:\\d\\d$",
+                    "type": "string"
+                },
+                "tutorial": {
+                    "description": "Id of the tutorial",
+                    "type": "string"
+                },
+                "widthFactor": {
+                    "description": "For internal use only. Do not manually set. This will be used in config\ngenerated by the calendar creator",
+                    "type": "number"
+                }
+            },
+            "required": [
+                "duration",
+                "time",
+                "tutorial"
+            ],
+            "type": "object"
+        },
+        "TutorialInfo": {
+            "additionalProperties": false,
+            "properties": {
+                "description": {
+                    "default": "Description coming soon!",
+                    "description": "Description of the tutorial. Supports markdown, including bold, italics, code,\nurls, and lists.",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "Unique ID for the tutorial. This can be used for linking via #id",
+                    "type": "string"
+                },
+                "image": {
+                    "description": "Relative url to the image for the tutorial. Image should be saved under public.\nThe url does not include public. For instance, if the image is saved at\n[Project]/public/img/tutorial-pic.png, enter \"/img/tutorial-pic.png\".\n\nImage should be saved with square dimensions larger than 250x250px",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "Tutorial name to be printed on the site",
+                    "type": "string"
+                },
+                "organizer": {
+                    "anyOf": [
+                        {
+                            "items": {
+                                "type": "string"
+                            },
+                            "type": "array"
+                        },
+                        {
+                            "type": "string"
+                        }
+                    ],
+                    "description": "Organizer or presenter of the workshop"
+                },
+                "panelists": {
+                    "description": "List of workshop panelists",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                }
+            },
+            "required": [
+                "id",
+                "name"
+            ],
+            "type": "object"
+        }
+    },
+    "description": "Config interface for Brainhack. Contains\nall the information needed to display the site",
+    "properties": {
+        "displaySections": {
+            "$ref": "#/definitions/DisplaySections"
+        },
+        "event": {
+            "$ref": "#/definitions/Event"
+        },
+        "faq": {
+            "items": {
+                "$ref": "#/definitions/FAQ"
+            },
+            "type": "array"
+        },
+        "forms": {
+            "additionalProperties": {
+                "$ref": "#/definitions/EmbeddedForm"
+            },
+            "type": "object"
+        },
+        "location": {
+            "$ref": "#/definitions/LocationConfig"
+        },
+        "organizers": {
+            "items": {
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "projects": {
+            "additionalProperties": false,
+            "description": "Object mapping years to project lists.\n\nThe allows the archiving of past projects",
+            "patternProperties": {
+                "^[0-9]+$": {
+                    "items": {
+                        "$ref": "#/definitions/Project"
+                    },
+                    "type": "array"
+                }
+            },
+            "type": "object"
+        },
+        "registration": {
+            "$ref": "#/definitions/Registration"
+        },
+        "schedule": {
+            "items": {
+                "$ref": "#/definitions/ScheduleConfig<AnyEvent>"
+            },
+            "type": "array"
+        },
+        "sponsors": {
+            "items": {
+                "$ref": "#/definitions/SponsorConfig"
+            },
+            "type": "array"
+        },
+        "tutorials": {
+            "items": {
+                "$ref": "#/definitions/TutorialInfo"
+            },
+            "type": "array"
+        },
+        "twitterUrl": {
+            "description": "twitter Url link for embedded feed",
+            "type": "string"
+        }
+    },
+    "required": [
+        "displaySections",
+        "event",
+        "location",
+        "organizers",
+        "registration",
+        "schedule",
+        "sponsors",
+        "tutorials"
+    ],
+    "type": "object"
+}
+
